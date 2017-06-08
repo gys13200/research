@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="utf-8">
+            <title>
+            </title>
+            <style>
+                body{
+                    margin:0px;
+                    padding:0px;
+                }
+                div{
+                    margin:0px;
+                    padding:0px;
+                }
+                .resizable{
+                    width:4px;
+                    height:4px;
+                    background: black;
+                    position:absolute;
+                    right:0;
+                    bottom:0;
+                    cursor:se-resize;
+                }
+                .forceBorder{
+                    border:1px dotted #F00
+                }
+                .scaleY{
+                    transform:scale(1.2,8);
+                }
+            </style>
+            <script src="js/jquery.js">
+            </script>
+            <script src="js/common.js">
+            </script>
+        </meta>
+    </head>
+    <body>
+        <div id="container" style="height: 600px">
+            <div id="bk" style="width:50px;height:50px;background: red;position: absolute;cursor:move ">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk1" style="width:80px;height:80px;background: black;position: absolute;cursor:move">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk2" style="width:50px;height:80px;background: gray;position: absolute;cursor:move">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk3" style="width:80px;height:50px;background: green;position: absolute;cursor:move;">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk4" style="width:80px;height:50px;background: green;position: absolute;cursor:move;">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk5" style="width:80px;height:50px;background: green;position: absolute;cursor:move;">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk6" style="width:80px;height:50px;background: green;position: absolute;cursor:move;">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk7" style="width:80px;height:50px;background: green;position: absolute;cursor:move;">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk8" style="width:80px;height:50px;background: green;position: absolute;cursor:move;">
+                <div class="resizable"></div>
+            </div>
+            <div id="bk9" style="width:80px;height:50px;background: green;position: absolute;cursor:move;">
+                <div class="resizable"></div>
+            </div>
+        </div>
+			<div id="line" style="width:1px;height:500px;background: black;position: absolute;z-index: 99999;top:10px">
+            </div>
+            <div id="lineY" style="width:500px;height:1px;background: black;position: absolute;z-index: 99999;left:0px; top: 1px">
+            </div>
+    </body>
+    <script>
+        
+		var orgX,orgY,eleX,eleY,hasMove=false;
+        var hasResize;
+		var onMovenEle;
+    	function performDrag(event){
+				if(hasMove){ //当元素可以拖拽时执行操作
+					//新位置计算方法为元素的上次位置加上新的位移量
+					var left=eleX+( event.pageX - orgX );
+					var top= eleY+( event.pageY - orgY);
+					//更新位置信息
+					onMovenEle.css({
+						top:top,
+						left:left
+					});
+                    adjustLocation();
+				}
+    	}
+
+    	function isTriger(num){
+    		return num <=7 && num >= -7;
+    	}
+
+    	function getAdjustLeft(item, currentDistance){
+
+    		var result = {
+    			elementX : -1,
+    			lineX: -1,
+    			distance: 1000
+    		};
+    		var adjustX = onMovenEle.offset().left - $(item).offset().left;
+    		if(isTriger(adjustX)){
+    			result.elementX = $(item).offset().left;
+    			result.lineX = $(item).offset().left;
+    			result.distance = adjustX;
+    			return result;
+    		}
+
+    		adjustX = onMovenEle.offset().left;
+    		if(isTriger(adjustX)){
+    			result.elementX = 0;
+    			result.lineX = 0;
+    			result.distance = adjustX;
+    			return result;
+    		}
+
+    		adjustX = onMovenEle.offset().left - ($(item).offset().left + $(item).width());
+    		if(isTriger(adjustX)){
+    			result.elementX = $(item).offset().left + $(item).width();
+    			result.lineX = $(item).offset().left + $(item).width();
+    			result.distance = adjustX;
+    			return result;
+    		}
+
+    		adjustX = onMovenEle.offset().left + onMovenEle.width() - $(item).offset().left;
+
+    		if(isTriger(adjustX)){
+    			result.elementX = $(item).offset().left - onMovenEle.width();
+    			result.lineX = $(item).offset().left;
+    			result.distance = adjustX;
+    			return result;
+    		}
+
+    		adjustX = onMovenEle.offset().left + onMovenEle.width() - ($(item).offset().left + $(item).width());
+    		if(isTriger(adjustX)){
+    			result.elementX = $(item).offset().left + $(item).width() - onMovenEle.width();
+    			result.lineX = $(item).offset().left + $(item).width();
+    			result.distance = adjustX;
+    			return result;
+    		}
+
+    		return result;
+
+    	}
+
+    	function getAdjustTop(item){
+    		var result = {
+    			elementY : -1,
+    			lineY: -1,
+    			distance: 1000
+    		};
+    		var adjustY = onMovenEle.offset().top - $(item).offset().top;
+    		if(isTriger(adjustY)){
+    			result.elementY = $(item).offset().top;
+    			result.lineY = $(item).offset().top;
+    			result.distance = adjustY;
+    			return result;
+    		}
+
+    		adjustY = onMovenEle.offset().top - ($(item).offset().top + $(item).height());
+    		if(isTriger(adjustY)){
+    			result.elementY = $(item).offset().top + $(item).height();
+    			result.lineY = $(item).offset().top + $(item).height();
+    			result.distance = adjustY;
+    			return result;
+    		}
+    		adjustY = onMovenEle.offset().top + onMovenEle.height() - $(item).offset().top;
+
+    		if(isTriger(adjustY)){
+    			result.elementY = $(item).offset().top - onMovenEle.height();
+    			result.lineY = $(item).offset().top;
+    			result.distance = adjustY;
+    			return result;
+    		}
+
+    		adjustY = onMovenEle.offset().top + onMovenEle.height() - ($(item).offset().top + $(item).height());
+    		if(isTriger(adjustY)){
+    			result.elementY = ($(item).offset().top + $(item).height()) - onMovenEle.height();
+    			result.lineY = $(item).offset().top + $(item).height();
+    			result.distance = adjustY;
+    			return result;
+    		}
+
+    		return result;
+    	}
+
+    	function showLineX(x){
+    		$("#line").css({
+    			left: x
+    		});
+    		$("#line").show();
+    	}
+
+    	function showLineY(y){
+    		$("#lineY").css({
+    			top: y
+    		});
+    		$("#lineY").show();
+    	}
+
+
+    	function adjustLocation(element){
+    		if(hasMove){
+    			var adjustX = null;
+    			var adjustY = null;
+    			$("#container").children().each(function(index, item){
+    				if(onMovenEle.attr("id") != $(item).attr("id")){
+    					var _adjustX = getAdjustLeft(item);
+    				
+    					if(adjustX == null){
+    						adjustX = _adjustX;
+    					}
+    					if(adjustX.distance > _adjustX.distance){
+    						adjustX = _adjustX;
+    					}
+
+    					var _adjustY = getAdjustTop(item);
+    					if(adjustY == null){
+    						adjustY = _adjustY;
+    					}
+    					if(adjustY.distance > _adjustY.distance){
+    						adjustY = _adjustY;
+    					}
+    				}
+    			});
+    			if(adjustX.elementX != -1){
+					onMovenEle.css({
+						left: adjustX.elementX
+					});
+					showLineX(adjustX.lineX);
+				}else{
+					$("#line").hide();
+				}
+				if(adjustY.elementY != -1){
+					onMovenEle.css({
+						top: adjustY.elementY
+					});
+					showLineY(adjustY.lineY);
+				}else{
+					$("#lineY").hide();
+				}
+
+
+    		}
+    	}
+
+        function getAdjustWidth(item){
+            var result = {
+                elementWidth : -1,
+                lineX: -1,
+                distance: 1000
+            };
+            var elementRight = onMovenEle.offset().left + onMovenEle.width();
+            if(isTriger(elementRight - item.offset().left)){
+                result.elementWidth = Math.abs(item.offset().left - onMovenEle.offset().left);
+                result.lineX = item.offset().left;
+                result.distance = Math.abs(elementRight - item.offset().left);
+                return result;
+            }
+
+            if(isTriger(elementRight - (item.offset().left + item.width()))){
+                result.elementWidth = Math.abs(item.offset().left + item.width() - onMovenEle.offset().left);
+                result.lineX = item.offset().left + item.width();
+                result.distance = Math.abs(elementRight - (item.offset().left + item.width()));
+                return result;
+            }
+
+            if(isTriger(onMovenEle.width() - item.width())){
+                result.elementWidth = item.width();
+                result.lineX = -1;
+                result.showForceTop = true;
+                result.distance = Math.abs(onMovenEle.width() - item.width());
+                result.item = item;
+            }
+            return result;
+        }
+
+        function getAdjustHeight(item){
+            var result = {
+                elementHeight : -1,
+                lineY: -1,
+                distance: 1000
+            };
+            var elementBottum = onMovenEle.offset().top + onMovenEle.height();
+            if(isTriger(elementBottum - item.offset().top)){
+                result.elementHeight = Math.abs(item.offset().top - onMovenEle.offset().top);
+                result.lineY = item.offset().top;
+                result.distance = Math.abs(elementBottum - item.offset().top);
+                return result;
+            }
+
+            if(isTriger(elementBottum - (item.offset().top + item.height()))){
+                result.elementHeight = Math.abs(item.offset().top + item.height() - onMovenEle.offset().top);
+                result.lineY = item.offset().top + item.height();
+                result.distance = Math.abs(elementBottum - (item.offset().top + item.height()));
+                return result;
+            }
+
+            if(isTriger(onMovenEle.height() - item.height())){
+                result.elementHeight = item.height();
+                result.lineY = -1;
+                result.showForceLeft = true;
+                result.distance = Math.abs(onMovenEle.height() - item.height());
+                return result;
+            }
+
+            return result;
+        }
+
+        function adjustSize(){
+            if(hasResize){
+                var adjustWidth = null;
+                var adjustHeight = null;
+                $("#container").children().each(function(index, item){
+                    if(onMovenEle.attr("id") != $(item).attr("id")){
+                        var _adjustWidth = getAdjustWidth($(item));
+                        if(adjustWidth == null){
+                            adjustWidth = _adjustWidth;
+                        }
+
+                        if(adjustWidth.distance > _adjustWidth.distance){
+                            adjustWidth = _adjustWidth;
+                        }
+
+                        var _adjustHeight = getAdjustHeight($(item));
+                        if(adjustHeight == null){
+                            adjustHeight = _adjustHeight;
+                        }
+                        if(adjustHeight.distance > _adjustHeight.distance){
+                            adjustHeight = _adjustHeight;
+                        }
+
+                    }
+                });
+
+                if(adjustWidth != null && adjustWidth.elementWidth != -1){
+                    onMovenEle.css({
+                        width:adjustWidth.elementWidth
+                    });
+                    showLineX(adjustWidth.lineX);
+                    showForceTop(onMovenEle, adjustWidth);
+                }else{
+                    $("#line").hide();
+                }
+
+
+            
+                if(adjustHeight != null && adjustHeight.elementHeight != -1){
+                    onMovenEle.css({
+                        height:adjustHeight.elementHeight
+                    });
+                    showLineY(adjustHeight.lineY);
+                    showForceLeft(onMovenEle, adjustHeight);
+                }else{
+                    $("#lineY").hide();
+                }
+
+
+            }
+        }
+
+        function showForceLeft(_item, adjustHeight){
+            if(!adjustHeight || !adjustHeight.showForceLeft){
+                return;
+            }
+            $("#container").children().each(function(index, item){
+                if($(item).height() == _item.height()){
+                    $(item).forceLeft();
+                }
+            });
+        }
+
+        function showForceTop(_item, adjustWidth){
+            if(!adjustWidth || !adjustWidth.showForceTop){
+                return false;
+            }
+            $("#container").children().each(function(index, item){
+                if($(item).width() == _item.width()){
+                    $(item).forceTop();
+                }
+            });
+        }
+
+        function performResize(e){
+            if(!hasResize){
+                return;
+            }
+            var width = e.pageX - onMovenEle.offset().left;
+            var height = e.pageY - onMovenEle.offset().top;
+            if(width<=10){
+                width = 10;
+            }
+            if(height<=10){
+                height=10;
+            }
+            onMovenEle.css({
+                width:width,
+                height:height
+            });
+            adjustSize();
+        }
+
+        function clearAll(){
+            $("#container").children().each(function(index, item){
+                $(item).removeForceLeft();
+                $(item).removeForceTop();
+            });
+        }
+    	
+        $(function(){
+			$("div[id^='bk']").bind("mousedown",function(e){
+                
+                if($(e.target).css("cursor") == "se-resize"){
+                    hasResize = true;
+                    onMovenEle = $(this);
+                    return;
+                }
+				orgX= e.pageX; //记录鼠标的水平位置
+				orgY= e.pageY; //记录鼠标的垂直位置
+				eleX=$(this).offset().left; //记录元素的水平位置
+				eleY=$(this).offset().top; //记录元素的垂直位置
+				hasMove=true; //鼠标按下时标明当前元素可以拖拽标识
+				onMovenEle = $(this);
+			});
+			$(document).on("mousemove",function(e){
+                clearAll();
+				performDrag(e);
+                performResize(e);
+			}).on("mouseup",function(e){
+				hasMove=false; //鼠标松开时设置元素不可拖拽
+                hasResize=false;
+				$("#lineY").hide();
+				$("#line").hide();
+                clearAll();
+			});
+			})
+    </script>
+</html>
